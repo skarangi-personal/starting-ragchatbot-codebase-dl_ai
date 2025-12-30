@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Flow - Timeline View</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 100%;
+            background: linear-gradient(180deg, #667eea 0%, #764ba2 50%, #43e97b 100%);
+            border-radius: 2px;
+        }
+
+        .timeline-item {
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content {
+            margin-left: 0;
+            margin-right: 52%;
+            text-align: right;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: 52%;
+            margin-right: 0;
+            text-align: left;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            top: 10px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border: 4px solid #667eea;
+            border-radius: 50%;
+            transform: translateX(-50%);
+            z-index: 10;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover .timeline-dot {
+            width: 32px;
+            height: 32px;
+            border-width: 3px;
+            top: 4px;
+            transform: translateX(-50%) scale(1.1);
+            box-shadow: 0 0 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .timeline-item:nth-child(3n) .timeline-dot {
+            border-color: #764ba2;
+        }
+
+        .timeline-item:nth-child(3n+1) .timeline-dot {
+            border-color: #4facfe;
+        }
+
+        .timeline-item:nth-child(3n+2) .timeline-dot {
+            border-color: #00f2fe;
+        }
+
+        .timeline-content {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .timeline-item:hover .timeline-content {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+            border-color: #667eea;
+            transform: translateY(-5px);
+        }
+
+        .timeline-title {
+            font-weight: 700;
+            font-size: 16px;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .timeline-stage {
+            display: inline-block;
+            font-size: 11px;
+            font-weight: 600;
+            padding: 4px 12px;
+            border-radius: 20px;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stage-frontend {
+            background: #667eea20;
+            color: #667eea;
+        }
+
+        .stage-backend {
+            background: #764ba220;
+            color: #764ba2;
+        }
+
+        .stage-datasource {
+            background: #4facfe20;
+            color: #4facfe;
+        }
+
+        .stage-external {
+            background: #00f2fe20;
+            color: #00f2fe;
+        }
+
+        .stage-response {
+            background: #43e97b20;
+            color: #43e97b;
+        }
+
+        .timeline-description {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .timeline-details {
+            font-size: 12px;
+            color: #999;
+            background: #f9f9f9;
+            padding: 10px;
+            border-radius: 4px;
+            border-left: 3px solid #e0e0e0;
+            margin-top: 10px;
+        }
+
+        .timeline-details strong {
+            color: #666;
+        }
+
+        .duration {
+            display: inline-block;
+            background: #f0f0f0;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #667eea;
+            margin-left: 10px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 40px;
+            flex-wrap: wrap;
+            padding-top: 20px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .legend-color {
+            width: 16px;
+            height: 16px;
+            border-radius: 3px;
+            border: 1px solid rgba(0,0,0,0.1);
+        }
+
+        .flow-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 30px;
+            padding-top: 30px;
+            border-top: 2px solid #e0e0e0;
+        }
+
+        .stat-card {
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 8px;
+            border-left: 4px solid #667eea;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #667eea;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #999;
+            margin-top: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 10px;
+            }
+
+            .timeline-item:nth-child(odd) .timeline-content,
+            .timeline-item:nth-child(even) .timeline-content {
+                margin-left: 40px;
+                margin-right: 0;
+                text-align: left;
+            }
+
+            .timeline-dot {
+                left: 10px;
+            }
+
+            .timeline-title {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RAG Chatbot - Request Flow (Timeline View)</h1>
+        <p class="subtitle">Sequential view of request processing stages from user input to response display</p>
+
+        <div class="timeline" id="timeline"></div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background: #667eea;"></div>
+                <span>Frontend</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #764ba2;"></div>
+                <span>Backend</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #4facfe;"></div>
+                <span>Data Sources</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #00f2fe;"></div>
+                <span>External APIs</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background: #43e97b;"></div>
+                <span>Response</span>
+            </div>
+        </div>
+
+        <div class="flow-stats">
+            <div class="stat-card">
+                <div class="stat-value">15</div>
+                <div class="stat-label">Processing Stages</div>
+            </div>
+            <div class="stat-card" style="border-left-color: #764ba2;">
+                <div class="stat-value">6</div>
+                <div class="stat-label" style="color: #764ba2;">Backend Components</div>
+            </div>
+            <div class="stat-card" style="border-left-color: #4facfe;">
+                <div class="stat-value">2</div>
+                <div class="stat-label" style="color: #4facfe;">Data Sources</div>
+            </div>
+            <div class="stat-card" style="border-left-color: #00f2fe;">
+                <div class="stat-value">1</div>
+                <div class="stat-label" style="color: #00f2fe;">External API</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const stages = [
+            {
+                title: "User Enters Query",
+                stage: "frontend",
+                description: "User types a question into the chat interface.",
+                details: "Input: Natural language question | Handler: Browser event listener"
+            },
+            {
+                title: "UI Captures Input",
+                stage: "frontend",
+                description: "Browser UI captures the text input and displays loading state.",
+                details: "File: index.html | Component: Chat form"
+            },
+            {
+                title: "JavaScript Processes",
+                stage: "frontend",
+                description: "sendMessage() function in script.js prepares the request payload.",
+                details: "File: script.js | Function: sendMessage() | Output: JSON object"
+            },
+            {
+                title: "HTTP POST Request",
+                stage: "frontend",
+                description: "Frontend sends POST request to backend API endpoint.",
+                details: "Endpoint: /api/query | Method: POST | Headers: Content-Type application/json"
+            },
+            {
+                title: "FastAPI Router",
+                stage: "backend",
+                description: "FastAPI receives HTTP request and validates payload.",
+                details: "File: app.py | Validation: Pydantic models | Middleware: CORS enabled"
+            },
+            {
+                title: "Request Validation",
+                stage: "backend",
+                description: "Pydantic models validate query and session_id fields.",
+                details: "Models: QueryRequest | Status: Success or validation error"
+            },
+            {
+                title: "RAG System Init",
+                stage: "backend",
+                description: "RAG system orchestrator initializes and plans request processing.",
+                details: "File: rag_system.py | Method: query() | Coordinates: Search + Generation"
+            },
+            {
+                title: "Session Retrieval",
+                stage: "backend",
+                description: "Session manager loads conversation history for context.",
+                details: "File: session_manager.py | Storage: In-memory dictionary | Data: Previous messages"
+            },
+            {
+                title: "Search Tools Activate",
+                stage: "backend",
+                description: "CourseSearchTool is invoked to search relevant course content.",
+                details: "File: search_tools.py | Tool: CourseSearchTool | Input: User query"
+            },
+            {
+                title: "Vector Store Query",
+                stage: "datasource",
+                description: "Search query is converted to embeddings and vector search is performed.",
+                details: "File: vector_store.py | Method: search() | Model: all-MiniLM-L6-v2"
+            },
+            {
+                title: "ChromaDB Search",
+                stage: "datasource",
+                description: "ChromaDB vector database returns similar course documents.",
+                details: "Database: ChromaDB | Method: Similarity search | Returns: Top N results"
+            },
+            {
+                title: "AI Generator Receives Results",
+                stage: "backend",
+                description: "Search results and conversation history are passed to AI generator.",
+                details: "File: ai_generator.py | Input: Results + History | Format: Prompt context"
+            },
+            {
+                title: "Claude API Call",
+                stage: "external",
+                description: "API request sent to Anthropic Claude for response generation.",
+                details: "Service: Anthropic Claude API | Model: claude-3-sonnet | Method: tool_use"
+            },
+            {
+                title: "Response Generation",
+                stage: "external",
+                description: "Claude generates contextual response based on search results.",
+                details: "Input: Prompt + Context | Output: AI-generated text | Sources: Tracked"
+            },
+            {
+                title: "Response Formatting",
+                stage: "backend",
+                description: "Response is assembled with sources and metadata.",
+                details: "Format: JSON | Fields: answer, sources, session_id"
+            },
+            {
+                title: "HTTP Response Sent",
+                stage: "response",
+                description: "FastAPI sends response back to frontend with status 200.",
+                details: "Status: 200 OK | Content-Type: application/json"
+            },
+            {
+                title: "Frontend Receives Response",
+                stage: "frontend",
+                description: "JavaScript receives and parses the JSON response.",
+                details: "Function: Response handler | Parsing: JSON.parse()"
+            },
+            {
+                title: "Markdown Rendering",
+                stage: "frontend",
+                description: "Response text is rendered as markdown using Marked.js library.",
+                details: "Library: Marked.js | Format: HTML | Rendering: DOM update"
+            },
+            {
+                title: "UI Display Update",
+                stage: "frontend",
+                description: "Final response displayed in chat interface with sources.",
+                details: "Component: Chat display | Animation: Fade in | Ready: Next query"
+            }
+        ];
+
+        const timeline = document.getElementById('timeline');
+
+        stages.forEach((stage, index) => {
+            const item = document.createElement('div');
+            item.className = 'timeline-item';
+
+            const stageClass = `stage-${stage.stage}`;
+            const duration = index % 3 === 0 ? '~50ms' : '~30ms';
+
+            item.innerHTML = `
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-title">
+                        ${index + 1}. ${stage.title}
+                        <span class="duration">${duration}</span>
+                    </div>
+                    <div class="timeline-stage ${stageClass}">${stage.stage}</div>
+                    <div class="timeline-description">${stage.description}</div>
+                    <div class="timeline-details">
+                        <strong>Details:</strong> ${stage.details}
+                    </div>
+                </div>
+            `;
+
+            timeline.appendChild(item);
+        });
+    </script>
+</body>
+</html>

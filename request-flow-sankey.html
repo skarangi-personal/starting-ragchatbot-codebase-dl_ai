@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Flow - Sankey Diagram</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        #sankey-diagram {
+            width: 100%;
+            height: 900px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: auto;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            background: #fafafa;
+        }
+
+        .node {
+            stroke: #fff;
+            stroke-width: 2px;
+            cursor: pointer;
+        }
+
+        .node:hover {
+            stroke: #333;
+            stroke-width: 3px;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+        }
+
+        .node-label {
+            font-size: 12px;
+            font-weight: 500;
+            pointer-events: none;
+            fill: #333;
+        }
+
+        .link {
+            stroke-opacity: 0.5;
+            fill: none;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 12px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+            max-width: 300px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            border: 1px solid #999;
+        }
+
+        .info-box {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 4px;
+            font-size: 13px;
+            color: #555;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 768px) {
+            #sankey-diagram {
+                height: 700px;
+            }
+
+            .node-label {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RAG Chatbot - Request Flow (Sankey Diagram)</h1>
+        <p class="subtitle">Flow of data through the system showing how requests transform at each stage</p>
+        <div id="sankey-diagram"></div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #667eea;"></div>
+                <span>Frontend Layer</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #764ba2;"></div>
+                <span>Backend Processing</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #4facfe;"></div>
+                <span>Data/Storage</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #00f2fe;"></div>
+                <span>External Services</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #43e97b;"></div>
+                <span>Response Flow</span>
+            </div>
+        </div>
+
+        <div class="info-box">
+            <strong>How to read this diagram:</strong> The width of each flow represents the data volume or importance of that path.
+            Hover over nodes to see details. The diagram shows how user queries flow through various processing stages and eventually
+            result in responses sent back to the frontend.
+        </div>
+    </div>
+
+    <script>
+        // Data structure for Sankey
+        const data = {
+            nodes: [
+                // Frontend Input
+                { id: "User Input", category: "frontend" },
+                { id: "Browser UI", category: "frontend" },
+                { id: "JavaScript", category: "frontend" },
+
+                // HTTP Layer
+                { id: "HTTP POST", category: "request" },
+
+                // Backend Entry
+                { id: "FastAPI", category: "backend" },
+                { id: "Validation", category: "backend" },
+
+                // Processing
+                { id: "RAG System", category: "backend" },
+                { id: "Session Mgr", category: "backend" },
+
+                // Search Pipeline
+                { id: "Search Tools", category: "backend" },
+                { id: "Vector Store", category: "datasource" },
+                { id: "ChromaDB", category: "datasource" },
+
+                // AI Pipeline
+                { id: "AI Generator", category: "backend" },
+                { id: "Claude API", category: "external" },
+
+                // Response Assembly
+                { id: "Format Response", category: "backend" },
+                { id: "HTTP Response", category: "response" },
+
+                // Frontend Display
+                { id: "Parse JSON", category: "frontend" },
+                { id: "Render Output", category: "frontend" },
+                { id: "Display Result", category: "frontend" }
+            ],
+            links: [
+                // User to Frontend
+                { source: 0, target: 1, value: 10 },
+                { source: 1, target: 2, value: 10 },
+
+                // Frontend to HTTP
+                { source: 2, target: 3, value: 10 },
+
+                // HTTP to Backend
+                { source: 3, target: 4, value: 10 },
+                { source: 4, target: 5, value: 10 },
+
+                // Backend Processing
+                { source: 5, target: 6, value: 10 },
+                { source: 6, target: 7, value: 5 },
+                { source: 6, target: 8, value: 10 },
+
+                // Search Pipeline
+                { source: 8, target: 9, value: 10 },
+                { source: 9, target: 10, value: 10 },
+                { source: 10, target: 8, value: 8 },
+
+                // Results to AI
+                { source: 8, target: 11, value: 8 },
+                { source: 11, target: 12, value: 8 },
+                { source: 12, target: 11, value: 8 },
+
+                // Response Assembly
+                { source: 11, target: 13, value: 8 },
+                { source: 7, target: 13, value: 5 },
+                { source: 13, target: 14, value: 10 },
+
+                // Response to Frontend
+                { source: 14, target: 15, value: 10 },
+                { source: 15, target: 16, value: 10 },
+                { source: 16, target: 17, value: 10 }
+            ]
+        };
+
+        // Set dimensions
+        const width = document.getElementById('sankey-diagram').clientWidth;
+        const height = 900;
+
+        // Create SVG
+        const svg = d3.select('#sankey-diagram')
+            .append('svg')
+            .attr('width', width)
+            .attr('height', height);
+
+        // Color mapping
+        const colorScale = {
+            'frontend': '#667eea',
+            'request': '#f093fb',
+            'backend': '#764ba2',
+            'datasource': '#4facfe',
+            'external': '#00f2fe',
+            'response': '#43e97b'
+        };
+
+        // Create Sankey layout
+        const sankey = d3.sankey()
+            .nodeWidth(15)
+            .nodePadding(50)
+            .extent([[1, 1], [width - 1, height - 1]]);
+
+        const { nodes, links } = sankey({
+            nodes: data.nodes.map(d => ({ ...d })),
+            links: data.links.map(d => ({ ...d }))
+        });
+
+        // Draw links
+        const link = svg.selectAll('.link')
+            .data(links)
+            .enter()
+            .append('path')
+            .attr('class', 'link')
+            .attr('d', d3.sankeyLinkHorizontal())
+            .attr('stroke', d => colorScale[d.source.category])
+            .attr('stroke-width', d => Math.max(1, d.width));
+
+        // Draw nodes
+        const node = svg.selectAll('.node')
+            .data(nodes)
+            .enter()
+            .append('g')
+            .attr('class', 'node');
+
+        node.append('rect')
+            .attr('x', d => d.x0)
+            .attr('y', d => d.y0)
+            .attr('height', d => d.y1 - d.y0)
+            .attr('width', d => d.x1 - d.x0)
+            .attr('fill', d => colorScale[d.category])
+            .attr('stroke', '#fff')
+            .attr('stroke-width', 2)
+            .on('mouseover', function(event, d) {
+                showTooltip(event, d);
+                // Highlight connected links
+                link.style('stroke-opacity', link_d =>
+                    link_d.source === d || link_d.target === d ? 0.8 : 0.3
+                );
+            })
+            .on('mouseout', function() {
+                hideTooltip();
+                link.style('stroke-opacity', 0.5);
+            });
+
+        node.append('text')
+            .attr('class', 'node-label')
+            .attr('x', d => d.x0 + (d.x1 - d.x0) / 2)
+            .attr('y', d => d.y0 - 5)
+            .attr('text-anchor', 'middle')
+            .text(d => d.id)
+            .attr('font-weight', '600');
+
+        // Tooltip
+        let tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        document.body.appendChild(tooltip);
+
+        function showTooltip(event, d) {
+            tooltip.innerHTML = `<strong>${d.id}</strong><br>Layer: ${d.category}`;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY + 10) + 'px';
+        }
+
+        function hideTooltip() {
+            tooltip.style.display = 'none';
+        }
+
+        document.addEventListener('mousemove', (event) => {
+            if (tooltip.style.display === 'block') {
+                tooltip.style.left = (event.pageX + 10) + 'px';
+                tooltip.style.top = (event.pageY + 10) + 'px';
+            }
+        });
+    </script>
+</body>
+</html>

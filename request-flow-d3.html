@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Request Flow - D3.js Diagram</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1400px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+        }
+
+        .subtitle {
+            color: #666;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 14px;
+        }
+
+        #d3-diagram {
+            width: 100%;
+            height: 800px;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        svg {
+            width: 100%;
+            height: 100%;
+            background: #fafafa;
+        }
+
+        .node {
+            cursor: pointer;
+        }
+
+        .node circle {
+            stroke-width: 2px;
+            transition: all 0.3s ease;
+        }
+
+        .node text {
+            font-size: 12px;
+            font-weight: 500;
+            pointer-events: none;
+            text-anchor: middle;
+        }
+
+        .node:hover circle {
+            r: 50;
+            filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.2));
+        }
+
+        .link {
+            stroke: #999;
+            stroke-opacity: 0.6;
+            stroke-width: 2px;
+            marker-end: url(#arrowhead);
+        }
+
+        .link:hover {
+            stroke: #667eea;
+            stroke-width: 3px;
+        }
+
+        .arrowhead {
+            fill: #999;
+        }
+
+        .tooltip {
+            position: absolute;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 6px;
+            font-size: 12px;
+            pointer-events: none;
+            z-index: 1000;
+            white-space: nowrap;
+            max-width: 300px;
+        }
+
+        .legend {
+            display: flex;
+            gap: 30px;
+            justify-content: center;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid #333;
+        }
+
+        .layer-label {
+            font-size: 14px;
+            font-weight: 600;
+            fill: #667eea;
+            pointer-events: none;
+        }
+
+        @media (max-width: 768px) {
+            #d3-diagram {
+                height: 600px;
+            }
+
+            .node text {
+                font-size: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RAG Chatbot - Request Flow (D3.js)</h1>
+        <p class="subtitle">Interactive visualization of user request flow from frontend to backend • Hover over nodes to see details</p>
+        <div id="d3-diagram"></div>
+
+        <div class="legend">
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #667eea;"></div>
+                <span>Frontend</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #f093fb;"></div>
+                <span>HTTP Request</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #764ba2;"></div>
+                <span>Backend Processing</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #4facfe;"></div>
+                <span>Data Sources</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #00f2fe;"></div>
+                <span>External APIs</span>
+            </div>
+            <div class="legend-item">
+                <div class="legend-color" style="background-color: #43e97b;"></div>
+                <span>Response</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const data = {
+            nodes: [
+                { id: 1, label: "User", category: "frontend", description: "End user entering query" },
+                { id: 2, label: "Browser UI", category: "frontend", description: "HTML/CSS Interface" },
+                { id: 3, label: "script.js", category: "frontend", description: "sendMessage() handler" },
+                { id: 4, label: "POST /api/query", category: "request", description: "HTTP Request with JSON payload" },
+                { id: 5, label: "FastAPI App", category: "backend", description: "app.py - Route handler" },
+                { id: 6, label: "RAG System", category: "backend", description: "rag_system.py - Orchestrator" },
+                { id: 7, label: "Session Manager", category: "backend", description: "Manage conversation history" },
+                { id: 8, label: "Search Tools", category: "backend", description: "CourseSearchTool" },
+                { id: 9, label: "Vector Store", category: "datasource", description: "vector_store.py" },
+                { id: 10, label: "ChromaDB", category: "datasource", description: "Vector database with embeddings" },
+                { id: 11, label: "AI Generator", category: "backend", description: "ai_generator.py" },
+                { id: 12, label: "Claude API", category: "external", description: "Anthropic Claude endpoint" },
+                { id: 13, label: "Response JSON", category: "response", description: "Answer + Sources + Session" },
+                { id: 14, label: "Parse Response", category: "frontend", description: "script.js - handle response" },
+                { id: 15, label: "Render UI", category: "frontend", description: "Display answer & sources" }
+            ],
+            links: [
+                { source: 1, target: 2, label: "enters query" },
+                { source: 2, target: 3, label: "triggers" },
+                { source: 3, target: 4, label: "creates" },
+                { source: 4, target: 5, label: "HTTP request" },
+                { source: 5, target: 6, label: "delegates to" },
+                { source: 6, target: 7, label: "loads" },
+                { source: 6, target: 8, label: "invokes" },
+                { source: 8, target: 9, label: "queries" },
+                { source: 9, target: 10, label: "searches" },
+                { source: 10, target: 9, label: "returns results" },
+                { source: 9, target: 11, label: "passes results" },
+                { source: 11, target: 12, label: "API call" },
+                { source: 12, target: 11, label: "generates response" },
+                { source: 11, target: 13, label: "formats" },
+                { source: 13, target: 14, label: "HTTP response" },
+                { source: 14, target: 15, label: "renders" }
+            ]
+        };
+
+        // Set dimensions
+        const margin = { top: 40, right: 40, bottom: 40, left: 40 };
+        const width = document.getElementById('d3-diagram').clientWidth - margin.left - margin.right;
+        const height = 800 - margin.top - margin.bottom;
+
+        // Create SVG
+        const svg = d3.select('#d3-diagram')
+            .append('svg')
+            .attr('width', width + margin.left + margin.right)
+            .attr('height', height + margin.top + margin.bottom)
+            .append('g')
+            .attr('transform', `translate(${margin.left},${margin.top})`);
+
+        // Add arrow marker
+        svg.append('defs').append('marker')
+            .attr('id', 'arrowhead')
+            .attr('markerWidth', 10)
+            .attr('markerHeight', 10)
+            .attr('refX', 25)
+            .attr('refY', 3)
+            .attr('orient', 'auto')
+            .append('polygon')
+            .attr('points', '0 0, 10 3, 0 6')
+            .attr('fill', '#999');
+
+        // Color scale
+        const colorScale = {
+            'frontend': '#667eea',
+            'request': '#f093fb',
+            'backend': '#764ba2',
+            'datasource': '#4facfe',
+            'external': '#00f2fe',
+            'response': '#43e97b'
+        };
+
+        // Create force simulation
+        const simulation = d3.forceSimulation(data.nodes)
+            .force('link', d3.forceLink(data.links)
+                .id(d => d.id)
+                .distance(100)
+                .strength(0.5))
+            .force('charge', d3.forceManyBody().strength(-300))
+            .force('center', d3.forceCenter(width / 2, height / 2))
+            .force('collide', d3.forceCollide(35));
+
+        // Create links
+        const link = svg.selectAll('.link')
+            .data(data.links)
+            .enter()
+            .append('line')
+            .attr('class', 'link')
+            .attr('stroke', '#999')
+            .attr('marker-end', 'url(#arrowhead)');
+
+        // Create nodes
+        const node = svg.selectAll('.node')
+            .data(data.nodes)
+            .enter()
+            .append('g')
+            .attr('class', 'node')
+            .call(d3.drag()
+                .on('start', dragStarted)
+                .on('drag', dragged)
+                .on('end', dragEnded));
+
+        node.append('circle')
+            .attr('r', 25)
+            .attr('fill', d => colorScale[d.category])
+            .attr('stroke', '#fff')
+            .on('mouseover', function(event, d) {
+                showTooltip(event, d);
+            })
+            .on('mouseout', hideTooltip);
+
+        node.append('text')
+            .attr('dy', '0.3em')
+            .attr('text-anchor', 'middle')
+            .text(d => d.label.substring(0, 3))
+            .attr('fill', 'white')
+            .attr('font-weight', 'bold')
+            .attr('font-size', '11px');
+
+        // Update positions
+        simulation.on('tick', () => {
+            link
+                .attr('x1', d => d.source.x)
+                .attr('y1', d => d.source.y)
+                .attr('x2', d => d.target.x)
+                .attr('y2', d => d.target.y);
+
+            node.attr('transform', d => `translate(${d.x},${d.y})`);
+        });
+
+        // Drag handlers
+        function dragStarted(event, d) {
+            if (!event.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x;
+            d.fy = d.y;
+        }
+
+        function dragged(event, d) {
+            d.fx = event.x;
+            d.fy = event.y;
+        }
+
+        function dragEnded(event, d) {
+            if (!event.active) simulation.alphaTarget(0);
+            d.fx = null;
+            d.fy = null;
+        }
+
+        // Tooltip
+        let tooltip = document.createElement('div');
+        tooltip.className = 'tooltip';
+        document.body.appendChild(tooltip);
+
+        function showTooltip(event, d) {
+            tooltip.innerHTML = `<strong>${d.label}</strong><br>${d.description}`;
+            tooltip.style.display = 'block';
+            tooltip.style.left = (event.pageX + 10) + 'px';
+            tooltip.style.top = (event.pageY + 10) + 'px';
+        }
+
+        function hideTooltip() {
+            tooltip.style.display = 'none';
+        }
+
+        document.addEventListener('mousemove', (event) => {
+            if (tooltip.style.display === 'block') {
+                tooltip.style.left = (event.pageX + 10) + 'px';
+                tooltip.style.top = (event.pageY + 10) + 'px';
+            }
+        });
+    </script>
+</body>
+</html>
