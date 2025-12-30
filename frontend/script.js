@@ -28,8 +28,10 @@ function setupEventListeners() {
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
     });
-    
-    
+
+    // New chat button
+    document.getElementById('newChatButton').addEventListener('click', createNewSession);
+
     // Suggested questions
     document.querySelectorAll('.suggested-item').forEach(button => {
         button.addEventListener('click', (e) => {
@@ -122,22 +124,22 @@ function addMessage(content, type, sources = null, isWelcome = false) {
     let html = `<div class="message-content">${displayContent}</div>`;
 
     if (sources && sources.length > 0) {
-        // Format sources with optional links
+        // Format sources as a list with optional links
         const formattedSources = sources.map(source => {
             // Handle both old format (string) and new format (object with title and url)
             if (typeof source === 'string') {
-                return source;
+                return `<li class="source-item"><span class="source-title">${source}</span></li>`;
             } else if (source.url) {
-                return `<a href="${source.url}" target="_blank" class="source-link">${source.title}</a>`;
+                return `<li class="source-item"><a href="${source.url}" target="_blank" class="source-link">${source.title}</a></li>`;
             } else {
-                return source.title;
+                return `<li class="source-item"><span class="source-title">${source.title}</span></li>`;
             }
-        }).join(', ');
+        }).join('');
 
         html += `
             <details class="sources-collapsible">
-                <summary class="sources-header">Sources</summary>
-                <div class="sources-content">${formattedSources}</div>
+                <summary class="sources-header">📚 Sources</summary>
+                <ul class="sources-list">${formattedSources}</ul>
             </details>
         `;
     }

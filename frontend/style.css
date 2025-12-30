@@ -220,42 +220,66 @@ header h1 {
 
 /* Collapsible Sources */
 .sources-collapsible {
-    margin-top: 0.5rem;
-    font-size: 0.75rem;
+    margin-top: 1rem;
+    font-size: 0.875rem;
     color: var(--text-secondary);
 }
 
-.sources-collapsible summary {
+.sources-header {
     cursor: pointer;
-    padding: 0.25rem 0.5rem;
+    padding: 0.5rem 0.75rem;
     user-select: none;
-    font-weight: 500;
+    font-weight: 600;
+    color: #60a5fa;
+    display: block;
+    transition: all 0.2s ease;
 }
 
-.sources-collapsible summary:hover {
-    color: var(--text-primary);
+.sources-header:hover {
+    color: #93c5fd;
 }
 
-.sources-collapsible[open] summary {
-    margin-bottom: 0.25rem;
+.sources-collapsible[open] .sources-header {
+    margin-bottom: 0.5rem;
 }
 
-.sources-content {
-    padding: 0 0.5rem 0.25rem 1.5rem;
+/* Sources List */
+.sources-list {
+    list-style: none;
+    padding: 0.5rem 0.75rem 0.5rem 1.5rem;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.source-item {
+    padding: 0.35rem 0;
+    line-height: 1.4;
+}
+
+.source-title {
     color: var(--text-secondary);
+    word-break: break-word;
 }
 
 /* Source Links */
 .source-link {
-    color: var(--primary-color);
-    text-decoration: underline;
+    color: #3b82f6;
+    text-decoration: none;
     cursor: pointer;
-    transition: color 0.2s ease, opacity 0.2s ease;
+    transition: all 0.2s ease;
+    font-weight: 500;
+    padding: 0.15rem 0.3rem;
+    border-radius: 3px;
+    display: inline-block;
+    word-break: break-word;
 }
 
 .source-link:hover {
-    color: var(--primary-hover);
-    opacity: 0.9;
+    color: #93c5fd;
+    background-color: rgba(59, 130, 246, 0.1);
+    text-decoration: underline;
 }
 
 .source-link:active {
@@ -486,6 +510,31 @@ header h1 {
 
 .stats-header:hover,
 .suggested-header:hover {
+    color: var(--primary-color);
+}
+
+/* New Chat Button */
+.new-chat-button {
+    width: 100%;
+    padding: 0.75rem 0;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    cursor: pointer;
+    transition: color 0.2s ease;
+    margin-bottom: 1.5rem;
+}
+
+.new-chat-button:hover {
+    color: var(--primary-color);
+}
+
+.new-chat-button:focus {
+    outline: none;
     color: var(--primary-color);
 }
 
