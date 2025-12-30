@@ -245,6 +245,23 @@ header h1 {
     color: var(--text-secondary);
 }
 
+/* Source Links */
+.source-link {
+    color: var(--primary-color);
+    text-decoration: underline;
+    cursor: pointer;
+    transition: color 0.2s ease, opacity 0.2s ease;
+}
+
+.source-link:hover {
+    color: var(--primary-hover);
+    opacity: 0.9;
+}
+
+.source-link:active {
+    opacity: 0.8;
+}
+
 /* Markdown formatting styles */
 .message-content h1,
 .message-content h2,
