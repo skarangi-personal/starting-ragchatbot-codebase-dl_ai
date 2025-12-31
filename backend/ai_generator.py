@@ -30,7 +30,21 @@ Provide only the direct answer to what was asked.
 """
     
     def __init__(self, api_key: str, model: str):
-        self.client = anthropic.Anthropic(api_key=api_key)
+        import os
+        base_url = os.getenv("ANTHROPIC_BASE_URL")
+        if base_url:
+            # For internal endpoints, pass token as bearer token in authorization header
+            from anthropic import Anthropic
+            import httpx
+            client = httpx.Client(
+                headers={
+                    "Authorization": f"Bearer {api_key}",
+                    "X-Realm": "users"
+                }
+            )
+            self.client = Anthropic(api_key=api_key, base_url=base_url, http_client=client)
+        else:
+            self.client = anthropic.Anthropic(api_key=api_key)
         self.model = model
         
         # Pre-build base API parameters

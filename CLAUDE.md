@@ -234,6 +234,31 @@ Key dependencies:
 - `uvicorn==0.35.0` - ASGI server
 - `python-dotenv==1.1.1` - Environment variables
 
+## MCP Server Configuration
+
+**Playwright MCP Server** - Only enable when browser automation is explicitly needed.
+
+The Playwright MCP server is currently configured but should be **disabled by default** to conserve resources:
+
+```bash
+# Remove Playwright MCP server (default state)
+claude mcp remove playwright -s local
+
+# Only add when browser automation is needed
+claude mcp add --transport stdio playwright -- npx -y @playwright/mcp@latest
+
+# Verify status
+claude mcp get playwright
+```
+
+**When to enable Playwright:**
+- Web scraping or content extraction from external websites
+- Automated browser interactions for testing
+- Screenshot capture for documentation
+- Form filling or web automation tasks
+
+**Note**: MCP servers only execute when their tools are actively used, but keeping them disconnected when not needed is preferred for this project.
+
 ## Notes for Future Work
 
 - No test suite currently exists

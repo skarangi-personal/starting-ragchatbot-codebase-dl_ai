@@ -3,7 +3,26 @@
     "allow": [
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd CLAUDE.md documentation and request flow visualizations\n\n- Created CLAUDE.md with comprehensive architecture guide for future Claude Code instances\n- Added emphasis on using UV for all Python dependency and runtime management\n- Created 4 interactive flow diagrams \\(D3.js, Recharts, Sankey, Timeline\\) to visualize request flow from frontend to backend\n- Diagrams show RAG system architecture with all components and their relationships\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(curl -s http://localhost:8000)",
+      "Bash(uv run uvicorn backend.app:app --reload --port 8000)",
+      "Bash(curl -s -X POST http://localhost:8000/api/query )",
+      "Bash(python3:*)",
+      "Bash(curl:*)",
+      "Bash(ztoken:*)",
+      "Bash(uv run:*)",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(pkill:*)",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_select_option",
+      "mcp__playwright__browser_type",
+      "mcp__playwright__browser_close",
+      "Bash(git worktree list)",
+      "Bash(git merge:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nCommit current changes before merging worktrees\n\nSave uncommitted changes in preparation for merging quality_feature, testing_feature, and ui_feature branches.\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
