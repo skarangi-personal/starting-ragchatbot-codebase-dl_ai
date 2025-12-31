@@ -32,7 +32,11 @@
       "Bash(git commit -m \"$\\(cat <<''EOF''\nMerge quality_feature branch with conflict resolution\n\n- Merged quality_feature branch which adds code quality tools \\(black, isort, mypy\\)\n- Resolved conflicts in settings, config, app.py, and uv.lock\n- Combined permissions for quality control scripts\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nMerge testing_feature branch with conflict resolution\n\n- Merged testing_feature branch which adds pytest and testing infrastructure\n- Combined dev dependencies from both quality_feature \\(black, ruff, isort\\) and testing_feature \\(pytest\\)\n- Configured pytest with markers, coverage reporting, and test discovery\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate settings with checkout permission\n\nAdd git checkout permission to allow conflict resolution during merges.\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nMerge ui_feature branch with conflict resolution\n\n- Merged ui_feature branch \\(minimal changes to settings\\)\n- Kept comprehensive permissions from previous merges\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nMerge ui_feature branch with conflict resolution\n\n- Merged ui_feature branch \\(minimal changes to settings\\)\n- Kept comprehensive permissions from previous merges\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate dependencies and add .trees to gitignore\n\n- Synced uv.lock with merged dependencies from quality, testing, and ui features\n- Added .trees/ to .gitignore to exclude git worktrees from repository\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git worktree:*)",
+      "Bash(git check-ignore:*)",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nClean up worktrees and finalize merge commits\n\n- Removed all git worktrees \\(quality_feature, testing_feature, ui_feature\\)\n- Cleaned up .trees directory\n- .trees is now properly added to .gitignore and won''t appear in repo\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }
