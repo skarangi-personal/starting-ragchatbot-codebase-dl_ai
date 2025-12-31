@@ -13,3 +13,32 @@ dependencies = [
     "python-multipart==0.0.20",
     "python-dotenv==1.1.1",
 ]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==7.4.3",
+    "pytest-cov==4.1.0",
+    "httpx>=0.27.0",
+]
+
+[tool.pytest.ini_options]
+# Pytest configuration
+testpaths = ["backend/tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+minversion = "7.0"
+addopts = [
+    "-v",
+    "--strict-markers",
+    "--tb=short",
+    "--cov=backend",
+    "--cov-report=term-missing",
+    "--cov-report=html:htmlcov",
+]
+markers = [
+    "unit: mark test as a unit test",
+    "integration: mark test as an integration test",
+    "api: mark test as an API test",
+    "slow: mark test as slow running",
+]
