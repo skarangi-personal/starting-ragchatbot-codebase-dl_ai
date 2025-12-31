@@ -218,6 +218,15 @@ header h1 {
     text-align: right;
 }
 
+/* Message timestamp */
+.message-timestamp {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+    margin-top: 0.35rem;
+    padding: 0 0.5rem;
+    opacity: 0.7;
+}
+
 /* Collapsible Sources */
 .sources-collapsible {
     margin-top: 1rem;
@@ -435,10 +444,14 @@ header h1 {
 }
 
 /* Loading Animation */
+.loading-message {
+    animation: slideInUp 0.3s ease-out;
+}
+
 .loading {
     display: inline-flex;
     gap: 4px;
-    padding: 0.75rem 1.25rem;
+    align-items: center;
 }
 
 .loading span {
@@ -457,6 +470,13 @@ header h1 {
     animation-delay: -0.16s;
 }
 
+.loading-text {
+    margin-left: 0.75rem;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
 @keyframes bounce {
     0%, 80%, 100% {
         transform: scale(0);
@@ -466,7 +486,85 @@ header h1 {
     }
 }
 
-/* Error Message */
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Error Message Container */
+.error-message-wrapper {
+    max-width: 85%;
+    align-self: flex-start;
+}
+
+.error-message-container {
+    display: flex;
+    gap: 1rem;
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.1) 0%, rgba(239, 68, 68, 0.05) 100%);
+    border: 2px solid rgba(239, 68, 68, 0.3);
+    border-radius: 12px;
+    padding: 1rem;
+    animation: slideInUp 0.3s ease-out;
+}
+
+.error-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+}
+
+.error-content {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.error-title {
+    font-weight: 700;
+    color: #fca5a5;
+    font-size: 0.95rem;
+}
+
+.error-text {
+    color: #f1f5f9;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.retry-button {
+    margin-top: 0.5rem;
+    padding: 0.5rem 1rem;
+    background: rgba(239, 68, 68, 0.2);
+    border: 1px solid rgba(239, 68, 68, 0.4);
+    border-radius: 6px;
+    color: #fca5a5;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    align-self: flex-start;
+}
+
+.retry-button:hover {
+    background: rgba(239, 68, 68, 0.3);
+    border-color: rgba(239, 68, 68, 0.6);
+    color: #fff;
+    transform: translateY(-1px);
+}
+
+.retry-button:active {
+    transform: translateY(0);
+}
+
+/* Legacy error message styling */
 .error-message {
     background: rgba(239, 68, 68, 0.1);
     color: #f87171;
@@ -511,6 +609,47 @@ header h1 {
 .stats-header:hover,
 .suggested-header:hover {
     color: var(--primary-color);
+}
+
+/* Timezone Toggle */
+.timezone-toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-bottom: 1.5rem;
+    padding: 0.75rem;
+    background: var(--background);
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+}
+
+.timezone-toggle label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.timezone-toggle select {
+    padding: 0.5rem 0.75rem;
+    background: var(--surface);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 0.875rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.timezone-toggle select:hover {
+    border-color: var(--primary-color);
+}
+
+.timezone-toggle select:focus {
+    outline: none;
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 3px var(--focus-ring);
 }
 
 /* New Chat Button */

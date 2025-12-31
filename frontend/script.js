@@ -3,9 +3,10 @@ const API_URL = '/api';
 
 // Global state
 let currentSessionId = null;
+let currentTimezone = 'local'; // 'local' or 'utc'
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, timezoneSelect;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -15,7 +16,15 @@ document.addEventListener('DOMContentLoaded', () => {
     sendButton = document.getElementById('sendButton');
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
-    
+    timezoneSelect = document.getElementById('timezoneSelect');
+
+    // Restore timezone preference from localStorage
+    const savedTimezone = localStorage.getItem('preferredTimezone');
+    if (savedTimezone) {
+        currentTimezone = savedTimezone;
+        timezoneSelect.value = savedTimezone;
+    }
+
     setupEventListeners();
     createNewSession();
     loadCourseStats();
@@ -27,6 +36,14 @@ function setupEventListeners() {
     sendButton.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
+    });
+
+    // Timezone selector
+    timezoneSelect.addEventListener('change', (e) => {
+        currentTimezone = e.target.value;
+        localStorage.setItem('preferredTimezone', currentTimezone);
+        // Update timestamps in existing messages
+        updateAllMessageTimestamps();
     });
 
     // New chat button
@@ -89,7 +106,9 @@ async function sendMessage() {
     } catch (error) {
         // Replace loading message with error
         loadingMessage.remove();
-        addMessage(`Error: ${error.message}`, 'assistant');
+        const errorMsg = createErrorMessage(error.message);
+        chatMessages.appendChild(errorMsg);
+        chatMessages.scrollTop = chatMessages.scrollHeight;
     } finally {
         chatInput.disabled = false;
         sendButton.disabled = false;
@@ -99,7 +118,7 @@ async function sendMessage() {
 
 function createLoadingMessage() {
     const messageDiv = document.createElement('div');
-    messageDiv.className = 'message assistant';
+    messageDiv.className = 'message assistant loading-message';
     messageDiv.innerHTML = `
         <div class="message-content">
             <div class="loading">
@@ -107,9 +126,58 @@ function createLoadingMessage() {
                 <span></span>
                 <span></span>
             </div>
+            <span class="loading-text">Thinking...</span>
         </div>
     `;
     return messageDiv;
+}
+
+function createErrorMessage(errorMsg) {
+    const messageDiv = document.createElement('div');
+    messageDiv.className = 'message error-message-wrapper';
+
+    const errorText = errorMsg === 'Query failed'
+        ? 'Sorry, I encountered an error processing your query. Please try again.'
+        : `Sorry, ${errorMsg}`;
+
+    messageDiv.innerHTML = `
+        <div class="error-message-container">
+            <div class="error-icon">⚠️</div>
+            <div class="error-content">
+                <div class="error-title">Error</div>
+                <div class="error-text">${escapeHtml(errorText)}</div>
+                <button class="retry-button" onclick="document.getElementById('chatInput').focus()">Try another question</button>
+            </div>
+        </div>
+    `;
+    return messageDiv;
+}
+
+function formatTimestamp(date, timezone) {
+    const options = {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true
+    };
+
+    if (timezone === 'utc') {
+        options.timeZone = 'UTC';
+    } else {
+        // Use browser's local timezone (Intl.DateTimeFormat handles this automatically)
+    }
+
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    const formattedDate = formatter.format(date);
+
+    if (timezone === 'utc') {
+        return `${formattedDate} UTC`;
+    } else {
+        return `${formattedDate} Local`;
+    }
 }
 
 function addMessage(content, type, sources = null, isWelcome = false) {
@@ -117,11 +185,16 @@ function addMessage(content, type, sources = null, isWelcome = false) {
     const messageDiv = document.createElement('div');
     messageDiv.className = `message ${type}${isWelcome ? ' welcome-message' : ''}`;
     messageDiv.id = `message-${messageId}`;
+    messageDiv.dataset.timestamp = new Date().toISOString();
 
     // Convert markdown to HTML for assistant messages
     const displayContent = type === 'assistant' ? marked.parse(content) : escapeHtml(content);
 
     let html = `<div class="message-content">${displayContent}</div>`;
+
+    // Add timestamp
+    const timestamp = formatTimestamp(new Date(), currentTimezone);
+    html += `<div class="message-timestamp">${timestamp}</div>`;
 
     if (sources && sources.length > 0) {
         // Format sources as a list with optional links
@@ -149,6 +222,18 @@ function addMessage(content, type, sources = null, isWelcome = false) {
     chatMessages.scrollTop = chatMessages.scrollHeight;
 
     return messageId;
+}
+
+function updateAllMessageTimestamps() {
+    const messages = chatMessages.querySelectorAll('.message');
+    messages.forEach(message => {
+        const timestamp = message.querySelector('.message-timestamp');
+        if (timestamp && message.dataset.timestamp) {
+            const originalDate = new Date(message.dataset.timestamp);
+            const newTimestamp = formatTimestamp(originalDate, currentTimezone);
+            timestamp.textContent = newTimestamp;
+        }
+    });
 }
 
 // Helper function to escape HTML for user messages
