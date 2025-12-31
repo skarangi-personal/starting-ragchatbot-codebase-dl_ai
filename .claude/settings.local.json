@@ -22,7 +22,13 @@
       "mcp__playwright__browser_close",
       "Bash(git worktree list)",
       "Bash(git merge:*)",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nCommit current changes before merging worktrees\n\nSave uncommitted changes in preparation for merging quality_feature, testing_feature, and ui_feature branches.\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nCommit current changes before merging worktrees\n\nSave uncommitted changes in preparation for merging quality_feature, testing_feature, and ui_feature branches.\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(uv sync:*)",
+      "Bash(uv add:*)",
+      "Bash(chmod:*)",
+      "Bash(./check_quality.sh)",
+      "Bash(./format_code.sh)",
+      "Bash(git checkout:*)"
     ]
   }
 }
