@@ -3,7 +3,14 @@
     "allow": [
       "Bash(git add:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nAdd CLAUDE.md documentation and request flow visualizations\n\n- Created CLAUDE.md with comprehensive architecture guide for future Claude Code instances\n- Added emphasis on using UV for all Python dependency and runtime management\n- Created 4 interactive flow diagrams \\(D3.js, Recharts, Sankey, Timeline\\) to visualize request flow from frontend to backend\n- Diagrams show RAG system architecture with all components and their relationships\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git push:*)"
+      "Bash(git push:*)",
+      "Bash(uv sync:*)",
+      "Bash(uv add:*)",
+      "Bash(uv run:*)",
+      "Bash(chmod:*)",
+      "Bash(./check_quality.sh)",
+      "Bash(./format_code.sh)",
+      "Bash(git commit:*)"
     ]
   }
 }
