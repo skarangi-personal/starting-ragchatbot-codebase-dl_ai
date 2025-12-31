@@ -31,7 +31,8 @@
       "Bash(git checkout:*)",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nMerge quality_feature branch with conflict resolution\n\n- Merged quality_feature branch which adds code quality tools \\(black, isort, mypy\\)\n- Resolved conflicts in settings, config, app.py, and uv.lock\n- Combined permissions for quality control scripts\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
       "Bash(git commit -m \"$\\(cat <<''EOF''\nMerge testing_feature branch with conflict resolution\n\n- Merged testing_feature branch which adds pytest and testing infrastructure\n- Combined dev dependencies from both quality_feature \\(black, ruff, isort\\) and testing_feature \\(pytest\\)\n- Configured pytest with markers, coverage reporting, and test discovery\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
-      "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate settings with checkout permission\n\nAdd git checkout permission to allow conflict resolution during merges.\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")"
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nUpdate settings with checkout permission\n\nAdd git checkout permission to allow conflict resolution during merges.\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")",
+      "Bash(git commit -m \"$\\(cat <<''EOF''\nMerge ui_feature branch with conflict resolution\n\n- Merged ui_feature branch \\(minimal changes to settings\\)\n- Kept comprehensive permissions from previous merges\n\n🤖 Generated with Claude Code\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n\\)\")"
     ]
   }
 }

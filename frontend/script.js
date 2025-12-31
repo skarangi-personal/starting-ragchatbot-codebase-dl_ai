@@ -4,9 +4,10 @@ const API_URL = '/api';
 // Global state
 let currentSessionId = null;
 let currentTimezone = 'local'; // 'local' or 'utc'
+let currentTheme = 'dark'; // 'dark' or 'light'
 
 // DOM elements
-let chatMessages, chatInput, sendButton, totalCourses, courseTitles, timezoneSelect;
+let chatMessages, chatInput, sendButton, totalCourses, courseTitles, timezoneSelect, themeToggle;
 
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
@@ -17,12 +18,25 @@ document.addEventListener('DOMContentLoaded', () => {
     totalCourses = document.getElementById('totalCourses');
     courseTitles = document.getElementById('courseTitles');
     timezoneSelect = document.getElementById('timezoneSelect');
+    themeToggle = document.getElementById('themeToggle');
 
     // Restore timezone preference from localStorage
     const savedTimezone = localStorage.getItem('preferredTimezone');
     if (savedTimezone) {
         currentTimezone = savedTimezone;
         timezoneSelect.value = savedTimezone;
+    }
+
+    // Restore theme preference from localStorage or system preference
+    const savedTheme = localStorage.getItem('preferredTheme');
+    if (savedTheme) {
+        currentTheme = savedTheme;
+        applyTheme(savedTheme);
+    } else {
+        // Check system preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        currentTheme = prefersDark ? 'dark' : 'light';
+        applyTheme(currentTheme);
     }
 
     setupEventListeners();
@@ -36,6 +50,22 @@ function setupEventListeners() {
     sendButton.addEventListener('click', sendMessage);
     chatInput.addEventListener('keypress', (e) => {
         if (e.key === 'Enter') sendMessage();
+    });
+
+    // Theme toggle
+    themeToggle.addEventListener('click', () => {
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        currentTheme = newTheme;
+        applyTheme(newTheme);
+        localStorage.setItem('preferredTheme', newTheme);
+    });
+
+    // Keyboard shortcut for theme toggle (Alt+T)
+    document.addEventListener('keydown', (e) => {
+        if (e.altKey && e.key === 't') {
+            e.preventDefault();
+            themeToggle.click();
+        }
     });
 
     // Timezone selector
@@ -59,6 +89,14 @@ function setupEventListeners() {
     });
 }
 
+// Theme Functions
+function applyTheme(theme) {
+    if (theme === 'light') {
+        document.documentElement.setAttribute('data-theme', 'light');
+    } else {
+        document.documentElement.removeAttribute('data-theme');
+    }
+}
 
 // Chat Functions
 async function sendMessage() {
