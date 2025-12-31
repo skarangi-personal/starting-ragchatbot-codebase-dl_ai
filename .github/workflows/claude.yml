@@ -30,11 +30,25 @@ jobs:
         with:
           fetch-depth: 1
 
+      - name: Debug - Check secrets and connectivity
+        run: |
+          echo "Checking ANTHROPIC_API_KEY presence..."
+          if [ -z "${{ secrets.ANTHROPIC_API_KEY }}" ]; then
+            echo "ERROR: ANTHROPIC_API_KEY secret is not set!"
+            exit 1
+          else
+            echo "✓ ANTHROPIC_API_KEY is set"
+          fi
+          echo ""
+          echo "Checking API endpoint reachability..."
+          curl -I https://api.anthropic.com/ || echo "Warning: Could not reach api.anthropic.com"
+
       - name: Run Claude Code
         id: claude
         uses: anthropics/claude-code-action@v1
         with:
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          show_full_output: true
 
           # This is an optional setting that allows Claude to read CI results on PRs
           additional_permissions: |
